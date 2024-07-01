@@ -30,14 +30,17 @@ def not_found(error):
     """
     return make_response(jsonify({'error': "Not found"}), 404)
 
+
 app.config['SWAGGER'] = {
     'title': 'AirBnB clone Restful API',
     'uiversion': 3
 }
 
+
 @app.route('/', methods=['GET'])
 def start():
     return render_template('yet1.html')
+
 
 Swagger(app)
 

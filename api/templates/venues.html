@@ -5,11 +5,11 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Event Hub Rental</title>
-        <link rel="stylesheet" href="../styles/header.css"> <!-- Link to external CSS file -->
-        <link rel="stylesheet" href="../styles/hero.css">
-        <link rel="stylesheet" href="../styles/body.css">
-        <link rel="stylesheet" href="../styles/featurevenue.css">
-        <link rel="stylesheet" href="../styles/footer.css">
+        <link rel="stylesheet" href="../static/styles/header.css"> <!-- Link to external CSS file -->
+        <link rel="stylesheet" href="../static/styles/hero.css">
+        <link rel="stylesheet" href="../static/styles/body.css">
+        <link rel="stylesheet" href="../static/styles/featurevenue.css">
+        <link rel="stylesheet" href="../static/styles/footer.css">
     </head>
 
     <body>
@@ -21,7 +21,7 @@
             <nav>
                 <ul>
                     <li><a href="index.html">Home</a></li>
-                    <li><a href="browse.html">Venues</a></li>
+                    <li><a href="/api/venues">Venues</a></li>
                     <li><a href="about.html">About Us</a></li>
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
@@ -52,14 +52,16 @@
             <div class="venues">
                 <!-- Repeat this block for each featured venue -->
 
+                {% for venue in venues %}
                 <div class="venue">
-                    {% for venue in venues %}
-                    <img src="{{ venue.img }}" alt="Venue Image">
-                    <h3>{{ venue.name }}</h3>
-                    <p>{{ venue.description }}</p>
-                    <p>{{ venue.price }}</p>
-                    {% endfor %}
+                    <a href="{{ url_for('app_views.get_venue', venue_id=venue.id)}}">
+                        <img src="{{ venue.img }}" alt="Venue Image">
+                        <h3>{{ venue.name }}</h3>
+                        <p>{{ venue.description }}</p>
+                        <p>{{ venue.price_by_night }}</p>
+                    </a>
                 </div>
+                {% endfor %}
 
                 <!-- <div class="venue">
                 <img src="img/venueimg/concert.jpg" alt="Venue Image">

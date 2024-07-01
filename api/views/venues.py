@@ -8,14 +8,18 @@ from api.views import app_views  # Import the Blueprint from app_views
 from flask import abort, jsonify, make_response, request, render_template  # Flask imports
 from flasgger.utils import swag_from  # For API documentation with Swagger
 
+
 @app_views.route('/venues', methods=['GET'], strict_slashes=False)
 @swag_from('documentation/venue/get_venues.yml', methods=['GET'])
 def get_venues():
     """
     Retrieves the list of all Venue objects
     """
-    venues = [venue.to_dict() for venue in storage.all().values() ]  # Convert all Venues to list of dictionaries
-    return render_template('venues.html', venues=venues)  # Return JSON response
+    venues = [venue.to_dict() for venue in Venue.load('venues.json')
+              ]  # Convert all Venues to list of dictionaries
+    # Return a renderd template
+    return render_template('venues.html', venues=venues)
+
 
 @app_views.route('/venues/<venue_id>', methods=['GET'], strict_slashes=False)
 @swag_from('documentation/venue/get_venue.yml', methods=['GET'])
@@ -23,11 +27,13 @@ def get_venue(venue_id):
     """
     Retrieves a Venue object by ID
     """
-    venue = storage.get(Venue, venue_id)  # Get the Venue by ID
+    venue = [Venue.get('venues.json', venue_id)]  # Get the Venue by ID
     if not venue:
         abort(404)  # If Venue not found, return 404
 
-    return jsonify(venue.to_dict())  # Return JSON response
+    # Return JSON response
+    return render_template('venues.html', venues=venue)
+
 
 @app_views.route('/venues/<venue_id>', methods=['DELETE'], strict_slashes=False)
 @swag_from('documentation/venue/delete_venue.yml', methods=['DELETE'])
@@ -43,6 +49,7 @@ def delete_venue(venue_id):
     storage.save()  # Save changes to the storage
     return make_response(jsonify({}), 200)  # Return empty JSON with 200 status
 
+
 @app_views.route('/venues', methods=['POST'], strict_slashes=False)
 @swag_from('documentation/venue/post_venue.yml', methods=['POST'])
 def post_venue():
@@ -55,21 +62,26 @@ def post_venue():
     data = request.get_json()
 
     if 'user_id' not in data:
-        abort(400, description="Missing user_id")  # Return 400 if 'user_id' is missing
+        # Return 400 if 'user_id' is missing
+        abort(400, description="Missing user_id")
 
     user = storage.get(User, data['user_id'])  # Verify User exists
     if not user:
         abort(404)  # If User not found, return 404
 
     if 'name' not in data:
-        abort(400, description="Missing name")  # Return 400 if 'name' is missing
+        # Return 400 if 'name' is missing
+        abort(400, description="Missing name")
 
     if 'location' not in data:
-        abort(400, description="Missing location")  # Return 400 if 'location' is missing
+        # Return 400 if 'location' is missing
+        abort(400, description="Missing location")
 
     venue = Venue(**data)  # Create a new Venue instance
     venue.save()  # Save the Venue to the storage
-    return make_response(jsonify(venue.to_dict()), 201)  # Return the new Venue in JSON with 201 status
+    # Return the new Venue in JSON with 201 status
+    return make_response(jsonify(venue.to_dict()), 201)
+
 
 @app_views.route('/venues/<venue_id>', methods=['PUT'], strict_slashes=False)
 @swag_from('documentation/venue/put_venue.yml', methods=['PUT'])
@@ -91,7 +103,9 @@ def put_venue(venue_id):
         if key not in ignore:
             setattr(venue, key, value)  # Update Venue attributes
     storage.save()  # Save changes to the storage
-    return make_response(jsonify(venue.to_dict()), 200)  # Return the updated Venue in JSON with 200 status
+    # Return the updated Venue in JSON with 200 status
+    return make_response(jsonify(venue.to_dict()), 200)
+
 
 @app_views.route('/venues_search', methods=['POST'], strict_slashes=False)
 @swag_from('documentation/venue/post_search.yml', methods=['POST'])
@@ -124,8 +138,10 @@ def venues_search():
     if amenities:
         if not list_venues:
             list_venues = storage.all(Venue).values()
-        amenities_objs = [storage.get(Amenity, amenity_id) for amenity_id in amenities]
-        list_venues = [venue for venue in list_venues if all(amenity in venue.amenities for amenity in amenities_objs)]
+        amenities_objs = [storage.get(Amenity, amenity_id)
+                          for amenity_id in amenities]
+        list_venues = [venue for venue in list_venues if all(
+            amenity in venue.amenities for amenity in amenities_objs)]
 
     result = [venue.to_dict() for venue in list_venues]
     for venue in result:

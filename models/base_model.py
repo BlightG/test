@@ -5,8 +5,10 @@ import os
 import uuid
 from datetime import datetime
 
+
 class BaseModel:
     """Base class for all models."""
+
     def __init__(self, *args, **kwargs):
         self.id = str(uuid.uuid4())
         self.created_at = datetime.now()
@@ -47,3 +49,11 @@ class BaseModel:
         """Loads the objects from a JSON file and creates instances."""
         data = cls.load_data(file_name)
         return [cls(**item) for item in data]
+
+    @classmethod
+    def get(cls, file_name, id):
+        """Loads a single object based on id"""
+        datas = cls.load(file_name)
+        for data in datas:
+            if id == data.to_dict()['id']:
+                return data
